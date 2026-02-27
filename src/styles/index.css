@@ -1,0 +1,88 @@
+:root {
+  /* Fondos */
+  --bg: #eef0f4;          /* gris claro principal */
+  --surface: #f8f9fb;     /* tarjetas */
+  --surface-strong: #ffffff;
+
+  /* Bordes */
+  --border: #dde1ea;
+
+  /* Texto */
+  --text: #1f2937;        /* gris muy oscuro */
+  --muted: #6b7280;       /* texto secundario */
+
+  /* Acentos */
+  --primary: #6366f1;     /* indigo suave */
+  --primary-soft: #eef2ff;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* Layout */
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 4px 12px rgba(15, 23, 42, 0.06);
+
+  --container: 1100px;
+}
+
+
+/* ========== Reset ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial;
+  line-height: 1.55;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* ========== Layout helpers ========== */
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 18px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 10px;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0;
+  color: var(--muted);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
+}
