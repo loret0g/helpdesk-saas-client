@@ -1,0 +1,231 @@
+.homePage {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.homePage::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    radial-gradient(900px 520px at 18% 10%, rgba(99, 102, 241, 0.16), transparent 60%),
+    radial-gradient(900px 520px at 78% 22%, rgba(34, 197, 94, 0.12), transparent 62%),
+    radial-gradient(700px 520px at 55% 100%, rgba(245, 158, 11, 0.08), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.0));
+  filter: saturate(115%);
+}
+
+/* Layout */
+.home__layout {
+  padding-top: 22px;
+  padding-bottom: 34px;
+}
+
+/* Hero */
+.homeHero {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 16px;
+  align-items: stretch;
+
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.homeHero__bg {
+  position: absolute;
+  /* inset: -16px; HACE QUE ME SALGA SCROLL LATERAL :(*/
+  border-radius: 22px;
+  background:
+    radial-gradient(900px 500px at 20% 10%, rgba(99, 102, 241, 0.22), transparent 55%),
+    radial-gradient(900px 500px at 70% 40%, rgba(34, 197, 94, 0.16), transparent 55%),
+    radial-gradient(600px 400px at 50% 90%, rgba(245, 158, 11, 0.10), transparent 60%);
+  filter: saturate(110%);
+  pointer-events: none;
+}
+
+.homeHero__content {
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.homeHero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.homeHero__badgeText {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.homeHero__title {
+  margin: 14px 0 8px;
+  font-size: 42px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.homeHero__accent {
+  color: var(--primary);
+}
+
+.homeHero__subtitle {
+  margin: 0;
+  color: var(--muted);
+  max-width: 56ch;
+}
+
+.homeHero__actions {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.homeHero__hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.homeHero__user {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Right preview */
+.homePreview {
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.homePreview__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+}
+
+.homePreview__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(31, 41, 55, 0.06);
+}
+
+.homePreview__title {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.homePreview__body {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.homeMetric {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.homeMetric__label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.homeMetric__value {
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.homePreview__note {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Feature grid */
+.homeGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.homeCard {
+  border-radius: 18px;
+}
+
+.homeCard__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(99, 102, 241, 0.10);
+  border: 1px solid rgba(99, 102, 241, 0.16);
+}
+
+.homeCard__title {
+  margin-top: 10px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.homeCard__text {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 920px) {
+  .homeHero {
+    grid-template-columns: 1fr;
+  }
+
+  .homeHero__title {
+    font-size: 36px;
+  }
+
+  .homeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .homeHero__title {
+    font-size: 30px;
+  }
+}

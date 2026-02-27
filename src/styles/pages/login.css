@@ -1,0 +1,148 @@
+.loginPage {
+  position: relative;
+  min-height: calc(100vh - 120px); /* ajusta si tu navbar/footer cambian */
+  display: grid;
+  align-items: center;
+}
+
+.loginPage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(900px 420px at 20% 15%, rgba(124, 92, 255, 0.12), transparent 60%),
+    radial-gradient(900px 420px at 80% 20%, rgba(34, 197, 94, 0.10), transparent 62%);
+}
+
+.loginPage__container {
+  position: relative;
+  padding: 28px 0 48px;
+}
+
+/* Card */
+.loginCard {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.loginCard__inner {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  min-height: 460px;
+}
+
+.loginCard__divider {
+  background: var(--border);
+}
+
+/* LEFT */
+.loginLeft {
+  padding: 32px;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+
+  background:
+    radial-gradient(600px 300px at 30% 20%, rgba(124, 92, 255, 0.10), transparent 60%),
+    rgba(255, 255, 255, 0.6);
+}
+
+.loginLeft__title {
+  margin: 0;
+  font-size: 44px;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.loginLeft__subtitle {
+  margin: 0;
+  color: var(--muted);
+  max-width: 52ch;
+}
+
+.loginLeft__demo {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  display: grid;
+  gap: 6px;
+}
+
+.loginLeft__demoTitle {
+  font-weight: 850;
+}
+
+.loginLeft__demoRow {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.loginLeft__demoRow code {
+  color: var(--text);
+  background: rgba(31, 41, 55, 0.06);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* RIGHT */
+.loginRight {
+  padding: 32px;
+  display: grid;
+  align-content: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.loginRight__title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.loginRight__text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.loginForm {
+  display: grid;
+  gap: 14px;
+}
+
+.loginForm__submit {
+  height: 46px;
+  font-weight: 850;
+}
+
+.loginForm__hint {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .loginCard__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .loginCard__divider {
+    display: none;
+  }
+
+  .loginLeft,
+  .loginRight {
+    padding: 20px;
+    align-content: start;
+  }
+
+  .loginLeft__title {
+    font-size: 34px;
+  }
+}
