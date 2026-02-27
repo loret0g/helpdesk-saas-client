@@ -1,0 +1,104 @@
+.createKbPage .createKb__layout {
+  display: grid;
+  gap: 14px;
+}
+
+/* Topbar */
+.createKbPage .createKb__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.createKbPage .createKb__topbarRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Header */
+.createKbPage .createKb__header {
+  display: grid;
+  gap: 6px;
+}
+
+.createKbPage .createKb__title {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: -0.03em;
+}
+
+.createKbPage .createKb__subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Form */
+.createKbPage .createKb__form {
+  display: grid;
+  gap: 14px;
+}
+
+/* Grid (desktop) */
+.createKbPage .createKb__grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1.3fr 0.7fr 0.7fr;
+  align-items: start;
+}
+
+.createKbPage .createKb__titleField {
+  grid-column: 1 / 2;
+}
+
+/* Slug card */
+.createKbPage .createKb__slugCard {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+}
+
+.createKbPage .createKb__slugLabel {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.createKbPage .createKb__slugValue code {
+  font-size: 13px;
+}
+
+.createKbPage .createKb__slugHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Content */
+.createKbPage .createKb__textarea {
+  resize: vertical;
+  min-height: 220px;
+  line-height: 1.6;
+}
+
+/* Error spacing */
+.createKbPage .createKb__error {
+  margin-top: 6px;
+}
+
+/* Loading hint */
+.createKbPage .createKb__hint {
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Responsive */
+@media (max-width: 820px) {
+  .createKbPage .createKb__grid {
+    grid-template-columns: 1fr;
+  }
+}
