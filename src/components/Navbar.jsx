@@ -45,12 +45,7 @@ export function Navbar() {
               </button>
             </>
           ) : (
-            <NavLink
-              to="/login"
-              className={({ isActive }) =>
-                `btn btn--primary ${isActive ? "btn--active" : ""}`
-              }
-            >
+            <NavLink to="/login" className="btn btn--primary">
               Login
             </NavLink>
           )}
