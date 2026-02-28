@@ -9,12 +9,11 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-
   background:
     radial-gradient(900px 520px at 18% 10%, rgba(99, 102, 241, 0.16), transparent 60%),
     radial-gradient(900px 520px at 78% 22%, rgba(34, 197, 94, 0.12), transparent 62%),
     radial-gradient(700px 520px at 55% 100%, rgba(245, 158, 11, 0.08), transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.0));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.0));
   filter: saturate(115%);
 }
 
@@ -26,25 +25,17 @@
 
 /* Hero */
 .homeHero {
+  position: relative;
   display: grid;
   grid-template-columns: 1.25fr 0.75fr;
   gap: 16px;
   align-items: stretch;
-
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
 }
 
 .homeHero__bg {
   position: absolute;
-  /* inset: -16px; HACE QUE ME SALGA SCROLL LATERAL :(*/
+  inset: 0;
   border-radius: 22px;
-  background:
-    radial-gradient(900px 500px at 20% 10%, rgba(99, 102, 241, 0.22), transparent 55%),
-    radial-gradient(900px 500px at 70% 40%, rgba(34, 197, 94, 0.16), transparent 55%),
-    radial-gradient(600px 400px at 50% 90%, rgba(245, 158, 11, 0.10), transparent 60%);
   filter: saturate(110%);
   pointer-events: none;
 }
