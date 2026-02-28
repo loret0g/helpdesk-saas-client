@@ -10,8 +10,10 @@ export async function listTickets(params = {}, options = {}) {
 }
 
 // GET /api/tickets/:id
-export async function getTicket(id) {
-  const res = await http.get(`/api/tickets/${id}`);
+export async function getTicket(id, options = {}) {
+  const res = await http.get(`/api/tickets/${id}`, {
+    signal: options.signal,
+  });
   return res.data;
 }
 
