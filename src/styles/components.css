@@ -395,3 +395,9 @@ a {
 .footer__inner p {
   color: var(--text);
 }
+
+.footer__iconLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
