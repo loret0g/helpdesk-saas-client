@@ -1,35 +1,31 @@
 export function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="footer">
       <div className="container footer__inner">
-        <p>Loreto Garde</p>
+        <p>© {year} Loreto Garde</p>
+
         <a
-          className="nav__github"
+          className="footer__iconLink"
           href="https://github.com/loret0g"
           target="_blank"
           rel="noreferrer"
           aria-label="GitHub"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.11 3.29 9.44 7.86 10.97.58.1.79-.25.79-.56v-2.02c-3.2.7-3.87-1.55-3.87-1.55-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.52-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a10.9 10.9 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.77 1.07.77 2.15v3.18c0 .31.21.67.8.56a11.52 11.52 0 0 0 7.85-10.97C23.5 5.74 18.27.5 12 .5z" />
           </svg>
         </a>
+
         <a
+          className="footer__iconLink"
           href="https://www.linkedin.com/in/loreto-garde/"
           target="_blank"
           rel="noreferrer"
           aria-label="LinkedIn"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-          >
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z" />
           </svg>
         </a>
