@@ -1,3 +1,4 @@
+/* ---------- Layout ---------- */
 .loginPage {
   position: relative;
   min-height: calc(100vh - 120px); /* ajusta si tu navbar/footer cambian */
@@ -21,7 +22,7 @@
   padding: 28px 0 48px;
 }
 
-/* Card */
+/* ---------- Card ---------- */
 .loginCard {
   border-radius: 24px;
   overflow: hidden;
@@ -38,7 +39,7 @@
   background: var(--border);
 }
 
-/* LEFT */
+/* ---------- Left ---------- */
 .loginLeft {
   padding: 32px;
   display: grid;
@@ -81,21 +82,31 @@
   color: var(--muted);
 }
 
-.loginLeft__demoRow code {
-  color: var(--text);
-  background: rgba(31, 41, 55, 0.06);
-  border: 1px solid var(--border);
-  padding: 2px 6px;
-  border-radius: 8px;
+.loginLeft__demoButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
-/* RIGHT */
+.loginLeft__demoNote {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* ---------- Right ---------- */
 .loginRight {
   padding: 32px;
   display: grid;
   align-content: center;
   gap: 16px;
   background: rgba(255, 255, 255, 0.6);
+}
+
+.loginRight__header {
+  display: grid;
+  gap: 6px;
 }
 
 .loginRight__title {
@@ -125,8 +136,7 @@
   color: var(--muted);
 }
 
-/* Responsive */
-
+/* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .loginCard__inner {
     grid-template-columns: 1fr;
