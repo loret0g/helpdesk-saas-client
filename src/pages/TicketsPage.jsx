@@ -43,24 +43,11 @@ function priorityToClass(priority) {
   }
 }
 
-function normalizeEnum(v) {
-  return String(v || "")
-    .trim()
-    .toUpperCase();
-}
-
-function getId(v) {
-  if (!v) return "";
-  if (typeof v === "string") return v;
-  return v._id || v.id || "";
-}
-
 export default function TicketsPage() {
   const { user } = useAuth();
   const isCustomer = user?.role === "CUSTOMER";
-  const isAgent = user?.role === "AGENT";
+  const isStaff = user?.role === "AGENT" || user?.role === "ADMIN";
   const isAdmin = user?.role === "ADMIN";
-  const isStaff = isAgent || isAdmin;
 
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,75 +55,62 @@ export default function TicketsPage() {
 
   // Toolbar UI state
   const [q, setQ] = useState("");
-  const [assigned, setAssigned] = useState("all");
+  const [assigned, setAssigned] = useState("all"); // all | unassigned | me
   const [status, setStatus] = useState(isStaff ? "ALL_EXCEPT_CLOSED" : "ALL");
   const [priority, setPriority] = useState("ALL");
 
+  // Construye params para backend (evita mandar "ruido")
+  const params = useMemo(() => {
+    const p = {};
+
+    // Búsqueda
+    if (q && q.trim()) p.q = q.trim();
+
+    // Assigned (solo staff; y para ADMIN no tiene sentido "me")
+    if (isStaff) {
+      if (assigned === "unassigned") p.assigned = "unassigned";
+      else if (assigned === "me" && !isAdmin) p.assigned = "me";
+      // si es "all", no enviamos nada
+    }
+
+    // Status
+    if (status && status !== "ALL") p.status = status;
+
+    // Priority
+    if (priority && priority !== "ALL") p.priority = priority;
+
+    return p;
+  }, [q, assigned, status, priority, isStaff, isAdmin]);
+
   useEffect(() => {
+    const controller = new AbortController();
     let alive = true;
 
-    async function load() {
+    // Debounce para q (queda más pro)
+    const t = setTimeout(async () => {
       try {
         setError("");
         setLoading(true);
 
-        const data = await listTickets();
+        const data = await listTickets(params, { signal: controller.signal });
         if (!alive) return;
 
         setTickets(Array.isArray(data) ? data : []);
       } catch (err) {
         if (!alive) return;
+        if (err?.name === "CanceledError" || err?.name === "AbortError") return;
         setError(err?.response?.data?.message || "Error loading tickets");
       } finally {
         if (alive) setLoading(false);
       }
-    }
+    }, 300);
 
-    load();
     return () => {
       alive = false;
+      clearTimeout(t);
+      controller.abort();
     };
-  }, []);
-
-  const filtered = useMemo(() => {
-    let items = [...tickets];
-
-    // Search (code/subject)
-    if (q.trim()) {
-      const text = q.trim().toLowerCase();
-      items = items.filter((t) => {
-        const code = (t.code || "").toLowerCase();
-        const subject = (t.subject || "").toLowerCase();
-        return code.includes(text) || subject.includes(text);
-      });
-    }
-
-    // Assigned filters (staff only)
-    if (isStaff) {
-      if (assigned === "me") {
-        // En UI no se muestra para ADMIN, pero si llegase por cualquier motivo, no rompe nada
-        const myId = getId(user);
-        items = items.filter((t) => getId(t.assigneeId) === myId);
-      } else if (assigned === "unassigned") {
-        items = items.filter((t) => !t.assigneeId);
-      }
-    }
-
-    // Status filter
-    if (status === "ALL_EXCEPT_CLOSED") {
-      items = items.filter((t) => t.status !== "CLOSED");
-    } else if (status !== "ALL") {
-      items = items.filter((t) => t.status === status);
-    }
-
-    // Priority filter
-    if (priority !== "ALL") {
-      const p = normalizeEnum(priority);
-      items = items.filter((t) => normalizeEnum(t.priority) === p);
-    }
-
-    return items;
-  }, [tickets, q, assigned, status, priority, isStaff, user]);
+  }, [params]);
 
   function resetFilters() {
     setQ("");
@@ -180,22 +154,10 @@ export default function TicketsPage() {
                 value={assigned}
                 onChange={(e) => setAssigned(e.target.value)}
               >
-                {/* AGENT */}
-                {isAgent && (
-                  <>
-                    <option value="all">Inbox</option>
-                    <option value="me">Assigned to me</option>
-                    <option value="unassigned">Unassigned</option>
-                  </>
-                )}
-
-                {/* ADMIN */}
-                {isAdmin && (
-                  <>
-                    <option value="all">All tickets</option>
-                    <option value="unassigned">Unassigned</option>
-                  </>
-                )}
+                <option value="all">All</option>
+                <option value="unassigned">Unassigned</option>
+                {/* ADMIN no se asigna: no mostramos "Assigned to me" */}
+                {!isAdmin && <option value="me">Assigned to me</option>}
               </select>
             </div>
           )}
@@ -241,7 +203,7 @@ export default function TicketsPage() {
           </button>
 
           <div className="ticketsToolbar__count toolbarShell__count">
-            Results: <b>{filtered.length}</b>
+            Results: <b>{tickets.length}</b>
           </div>
         </div>
 
@@ -256,7 +218,7 @@ export default function TicketsPage() {
           <div className="alert alert--danger">
             <b>Oops.</b> {error}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : tickets.length === 0 ? (
           <div className="empty">
             <div className="empty__title">No tickets found</div>
             <div className="empty__text">
@@ -265,7 +227,7 @@ export default function TicketsPage() {
           </div>
         ) : (
           <div className="ticketsList">
-            {filtered.map((t) => (
+            {tickets.map((t) => (
               <Link key={t._id} to={`/tickets/${t._id}`} className="ticketRow">
                 <div className="ticketRow__main">
                   <div className="ticketRow__top">
