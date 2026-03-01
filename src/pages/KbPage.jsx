@@ -28,13 +28,13 @@ export default function KbPage() {
 
   const [q, setQ] = useState("");
   const [categorySlug, setCategorySlug] = useState("");
-  const [status, setStatus] = useState(""); // staff
+  const [status, setStatus] = useState(""); // solo staff
 
   const [loading, setLoading] = useState(true);
   const [catLoading, setCatLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // params para backend (solo enviamos lo que tenga valor)
+  // Params para backend (solo enviamos lo que tenga valor)
   const params = useMemo(() => {
     const p = {};
     if (q.trim()) p.q = q.trim();
@@ -46,47 +46,61 @@ export default function KbPage() {
   // Cargar categorías
   useEffect(() => {
     const controller = new AbortController();
+    let alive = true;
 
-    async function loadCategories() {
+    async function load() {
       try {
         setCatLoading(true);
         const data = await listCategories({ signal: controller.signal });
-        setCategories(data?.categories || []);
+        if (!alive) return;
+
+        const items = Array.isArray(data) ? data : data?.categories || [];
+        setCategories(items);
       } catch (err) {
+        if (!alive) return;
         if (err?.name === "CanceledError" || err?.name === "AbortError") return;
         console.error(err);
       } finally {
-        setCatLoading(false);
+        if (alive) setCatLoading(false);
       }
     }
 
-    loadCategories();
-    return () => controller.abort();
+    load();
+    return () => {
+      alive = false;
+      controller.abort();
+    };
   }, []);
 
-  // Cargar artículos con filtros
+  // Cargar artículos con filtros (debounce + abort)
   useEffect(() => {
     const controller = new AbortController();
+    let alive = true;
 
-    async function loadKb() {
+    const t = setTimeout(async () => {
       try {
         setError("");
         setLoading(true);
 
-        const data = await listKbArticles(params, {
-          signal: controller.signal,
-        });
-        setArticles(data || []);
+        const data = await listKbArticles(params, { signal: controller.signal });
+        if (!alive) return;
+
+        const items = Array.isArray(data) ? data : data?.articles || [];
+        setArticles(items);
       } catch (err) {
+        if (!alive) return;
         if (err?.name === "CanceledError" || err?.name === "AbortError") return;
         setError(err?.response?.data?.message || "Error loading KB");
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
-    }
+    }, 300);
 
-    loadKb();
-    return () => controller.abort();
+    return () => {
+      alive = false;
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [params]);
 
   function clearFilters() {
@@ -98,7 +112,6 @@ export default function KbPage() {
   return (
     <div className="page kbPage">
       <div className="container">
-        {/* Header */}
         <div className="pageHeader">
           <div>
             <h1 className="pageTitle">Knowledge Base</h1>
@@ -112,7 +125,6 @@ export default function KbPage() {
           )}
         </div>
 
-        {/* Toolbar */}
         <div className="toolbarShell kbToolbar">
           <div className="field">
             <input
@@ -170,7 +182,6 @@ export default function KbPage() {
           </div>
         </div>
 
-        {/* Content */}
         {loading ? (
           <div className="kbList">
             <div className="kbRow kbRow--skeleton" />
@@ -194,13 +205,9 @@ export default function KbPage() {
                   <div className="kbRow__title">{a.title}</div>
 
                   <div className="kbRow__meta">
-                    {a.categoryId?.name ? (
-                      <span className="badge badge--muted">
-                        {a.categoryId.name}
-                      </span>
-                    ) : (
-                      <span className="badge badge--muted">Uncategorized</span>
-                    )}
+                    <span className="badge badge--muted">
+                      {a.categoryId?.name || "Uncategorized"}
+                    </span>
 
                     {isStaff && a.status ? (
                       <span className={`badge ${statusToBadge(a.status)}`}>
