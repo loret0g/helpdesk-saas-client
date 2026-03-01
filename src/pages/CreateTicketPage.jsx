@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { createTicket } from "../api/tickets.api";
@@ -23,6 +23,24 @@ export default function CreateTicketPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const disableSubmit = useMemo(() => {
+    return (
+      loading ||
+      catLoading ||
+      categories.length === 0 ||
+      !subject.trim() ||
+      !description.trim() ||
+      !categorySlug.trim()
+    );
+  }, [
+    loading,
+    catLoading,
+    categories.length,
+    subject,
+    description,
+    categorySlug,
+  ]);
+
   useEffect(() => {
     if (!isCustomer) return;
 
@@ -34,9 +52,10 @@ export default function CreateTicketPage() {
         setCatLoading(true);
 
         const data = await listCategories();
+
         if (!alive) return;
 
-        const items = data.categories || [];
+        const items = Array.isArray(data) ? data : data?.categories || [];
         setCategories(items);
 
         if (!categorySlug && items.length > 0) {
@@ -51,6 +70,7 @@ export default function CreateTicketPage() {
     }
 
     loadCategories();
+
     return () => {
       alive = false;
     };
@@ -61,17 +81,26 @@ export default function CreateTicketPage() {
     e.preventDefault();
     setError("");
 
-    if (!subject.trim() || !description.trim() || !categorySlug.trim()) {
+    const nextSubject = subject.trim();
+    const nextDescription = description.trim();
+    const nextCategorySlug = categorySlug.trim();
+
+    if (!nextSubject || !nextDescription || !nextCategorySlug) {
       setError("Please fill Subject, Description and Category.");
+      return;
+    }
+
+    if (nextDescription.length < 10) {
+      setError("Description must be at least 10 characters.");
       return;
     }
 
     setLoading(true);
     try {
       const ticket = await createTicket({
-        subject: subject.trim(),
-        description: description.trim(),
-        categorySlug: categorySlug.trim(),
+        subject: nextSubject,
+        description: nextDescription,
+        categorySlug: nextCategorySlug,
         priority,
       });
 
@@ -93,20 +122,18 @@ export default function CreateTicketPage() {
             </Link>
           </div>
 
-          <div className="alert alert--danger">
-            <b>Access denied.</b> Only CUSTOMER users can create tickets in this MVP.
+          <div className="alert alert--danger" role="alert">
+            <b>Access denied.</b> Only CUSTOMER users can create tickets in this
+            MVP.
           </div>
         </div>
       </div>
     );
   }
 
-  const disableSubmit = loading || catLoading || categories.length === 0;
-
   return (
     <div className="page createTicketPage">
       <div className="container createTicket__layout">
-        {/* Topbar */}
         <div className="createTicket__topbar">
           <Link className="btn btn--ghost" to="/tickets">
             ← Back
@@ -117,7 +144,6 @@ export default function CreateTicketPage() {
           </div>
         </div>
 
-        {/* Header */}
         <div className="createTicket__header">
           <div>
             <h1 className="createTicket__title">New ticket</h1>
@@ -127,33 +153,46 @@ export default function CreateTicketPage() {
           </div>
         </div>
 
-        {/* Form */}
-        <form className="card card--pad createTicket__form" onSubmit={handleSubmit}>
+        <form
+          className="card card--pad createTicket__form"
+          onSubmit={handleSubmit}
+        >
           <div className="createTicket__grid">
             <div className="field createTicket__subjectField">
-              <label className="field__label">Subject</label>
+              <label className="field__label" htmlFor="subject">
+                Subject
+              </label>
               <input
+                id="subject"
                 className="input"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="e.g. I can’t log in"
+                disabled={loading}
+                required
               />
             </div>
 
             <div className="field">
-              <label className="field__label">Category</label>
+              <label className="field__label" htmlFor="category">
+                Category
+              </label>
 
               {catLoading ? (
                 <div className="createTicket__hint">Loading categories…</div>
               ) : categories.length === 0 ? (
                 <div className="createTicket__hint createTicket__hint--danger">
-                  No categories found. Run the seed or create categories in the DB.
+                  No categories found. Run the seed or create categories in the
+                  DB.
                 </div>
               ) : (
                 <select
+                  id="category"
                   className="select"
                   value={categorySlug}
                   onChange={(e) => setCategorySlug(e.target.value)}
+                  disabled={loading}
+                  required
                 >
                   {categories.map((c) => (
                     <option key={c.slug} value={c.slug}>
@@ -165,11 +204,15 @@ export default function CreateTicketPage() {
             </div>
 
             <div className="field">
-              <label className="field__label">Priority</label>
+              <label className="field__label" htmlFor="priority">
+                Priority
+              </label>
               <select
+                id="priority"
                 className="select"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
+                disabled={loading}
               >
                 <option value="LOW">LOW</option>
                 <option value="NORMAL">NORMAL</option>
@@ -180,24 +223,37 @@ export default function CreateTicketPage() {
           </div>
 
           <div className="field">
-            <label className="field__label">Description</label>
+            <label className="field__label" htmlFor="description">
+              Description
+            </label>
             <textarea
+              id="description"
               className="textarea createTicket__textarea"
               rows={8}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What happened? What did you expect? Steps to reproduce…"
+              disabled={loading}
+              required
             />
           </div>
 
           {error ? (
-            <div className="alert alert--danger createTicket__error">
+            <div
+              className="alert alert--danger createTicket__error"
+              role="alert"
+              aria-live="polite"
+            >
               <b>Oops.</b> {error}
             </div>
           ) : null}
 
           <div className="createTicket__actions">
-            <button className="btn btn--primary" type="submit" disabled={disableSubmit}>
+            <button
+              className="btn btn--primary"
+              type="submit"
+              disabled={disableSubmit}
+            >
               {loading ? "Creating…" : "Create ticket"}
             </button>
 
