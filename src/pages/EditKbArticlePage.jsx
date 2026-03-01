@@ -1,11 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import {
-  archiveKbArticle,
-  updateKbArticle,
-  getKbArticleById,
-} from "../api/kb.api";
+import { archiveKbArticle, updateKbArticle, getKbArticleById } from "../api/kb.api";
 import { listCategories } from "../api/categories.api";
 
 import "../styles/pages/kb-edit.css";
@@ -14,10 +10,11 @@ export default function EditKbArticlePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+
   const isStaff = user?.role === "AGENT" || user?.role === "ADMIN";
 
   const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState(""); // solo lectura
+  const [slug, setSlug] = useState("");
   const [content, setContent] = useState("");
   const [status, setStatus] = useState("DRAFT");
   const [categorySlug, setCategorySlug] = useState("");
@@ -29,10 +26,13 @@ export default function EditKbArticlePage() {
   const [archiving, setArchiving] = useState(false);
   const [error, setError] = useState("");
 
+  const isBusy = useMemo(() => saving || archiving, [saving, archiving]);
+
   useEffect(() => {
     if (!isStaff) return;
 
     const controller = new AbortController();
+    let alive = true;
 
     async function load() {
       try {
@@ -40,33 +40,50 @@ export default function EditKbArticlePage() {
         setLoading(true);
 
         const [article, catData] = await Promise.all([
-          getKbArticleById(id),
-          listCategories(),
+          getKbArticleById(id, { signal: controller.signal }),
+          listCategories({ signal: controller.signal }),
         ]);
 
-        setTitle(article.title || "");
-        setSlug(article.slug || "");
-        setContent(article.content || "");
-        setStatus(article.status || "DRAFT");
-        setCategorySlug(article.categoryId?.slug || "");
+        if (!alive) return;
 
-        setCategories(catData.categories || []);
+        const cats = Array.isArray(catData) ? catData : catData?.categories || [];
+
+        setTitle(article?.title || "");
+        setSlug(article?.slug || "");
+        setContent(article?.content || "");
+        setStatus(article?.status || "DRAFT");
+        setCategorySlug(article?.categoryId?.slug || "");
+        setCategories(cats);
+
+        if (!article?.categoryId?.slug && cats.length > 0) {
+          setCategorySlug(cats[0].slug);
+        }
       } catch (err) {
+        if (err?.name === "CanceledError" || err?.name === "AbortError") return;
+        if (!alive) return;
         setError(err?.response?.data?.message || "Error loading article");
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
     }
 
     load();
-    return () => controller.abort();
+
+    return () => {
+      alive = false;
+      controller.abort();
+    };
   }, [id, isStaff]);
 
   async function handleSave(e) {
     e.preventDefault();
     setError("");
 
-    if (!title.trim() || !content.trim() || !categorySlug) {
+    const nextTitle = title.trim();
+    const nextContent = content.trim();
+    const nextCategorySlug = categorySlug?.trim();
+
+    if (!nextTitle || !nextContent || !nextCategorySlug) {
       setError("Please complete title, category and content.");
       return;
     }
@@ -74,13 +91,12 @@ export default function EditKbArticlePage() {
     setSaving(true);
     try {
       const updated = await updateKbArticle(id, {
-        title: title.trim(),
-        content: content.trim(),
+        title: nextTitle,
+        content: nextContent,
         status,
-        categorySlug,
+        categorySlug: nextCategorySlug,
       });
 
-      // ✅ tu backend devuelve el doc -> usamos updated.slug directo
       navigate(`/kb/${updated.slug}`);
     } catch (err) {
       setError(err?.response?.data?.message || "Error saving article");
@@ -115,7 +131,7 @@ export default function EditKbArticlePage() {
             </Link>
           </div>
 
-          <div className="alert alert--danger">
+          <div className="alert alert--danger" role="alert">
             <b>Access denied.</b> Only AGENT/ADMIN can edit KB articles.
           </div>
         </div>
@@ -143,7 +159,6 @@ export default function EditKbArticlePage() {
   return (
     <div className="page kbEditPage">
       <div className="container kbEdit__layout">
-        {/* Topbar */}
         <div className="kbEdit__topbar">
           <Link className="btn btn--ghost" to="/kb">
             ← Back
@@ -154,7 +169,7 @@ export default function EditKbArticlePage() {
               className="btn btn--danger"
               type="button"
               onClick={handleArchive}
-              disabled={archiving || saving}
+              disabled={isBusy}
               title="Archive article"
             >
               {archiving ? "Archiving…" : "Archive"}
@@ -164,14 +179,13 @@ export default function EditKbArticlePage() {
               className="btn btn--primary"
               type="submit"
               form="kbEditForm"
-              disabled={saving || archiving}
+              disabled={isBusy}
             >
               {saving ? "Saving…" : "Save"}
             </button>
           </div>
         </div>
 
-        {/* Header */}
         <div className="card card--pad kbEdit__header">
           <div className="kbEdit__titleWrap">
             <h1 className="kbEdit__title">Edit article</h1>
@@ -181,12 +195,11 @@ export default function EditKbArticlePage() {
           </div>
 
           {error ? (
-            <div className="alert alert--danger kbEdit__inlineError">
+            <div className="alert alert--danger kbEdit__inlineError" role="alert" aria-live="polite">
               <b>Oops.</b> {error}
             </div>
           ) : null}
 
-          {/* Form */}
           <form id="kbEditForm" className="kbEdit__form" onSubmit={handleSave}>
             <label className="label">
               <span>Title</span>
@@ -195,6 +208,7 @@ export default function EditKbArticlePage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. How to reset password"
+                disabled={isBusy}
               />
             </label>
 
@@ -205,6 +219,7 @@ export default function EditKbArticlePage() {
                   className="select"
                   value={categorySlug}
                   onChange={(e) => setCategorySlug(e.target.value)}
+                  disabled={isBusy}
                 >
                   {categories.map((c) => (
                     <option key={c.slug} value={c.slug}>
@@ -220,6 +235,7 @@ export default function EditKbArticlePage() {
                   className="select"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
+                  disabled={isBusy}
                 >
                   <option value="DRAFT">DRAFT</option>
                   <option value="PUBLISHED">PUBLISHED</option>
@@ -236,25 +252,16 @@ export default function EditKbArticlePage() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write the article content…"
+                disabled={isBusy}
               />
             </label>
 
-            {/* Mobile-only actions */}
             <div className="kbEdit__mobileActions">
-              <button
-                className="btn btn--primary"
-                type="submit"
-                disabled={saving || archiving}
-              >
+              <button className="btn btn--primary" type="submit" disabled={isBusy}>
                 {saving ? "Saving…" : "Save"}
               </button>
 
-              <button
-                className="btn btn--danger"
-                type="button"
-                onClick={handleArchive}
-                disabled={archiving || saving}
-              >
+              <button className="btn btn--danger" type="button" onClick={handleArchive} disabled={isBusy}>
                 {archiving ? "Archiving…" : "Archive"}
               </button>
             </div>
