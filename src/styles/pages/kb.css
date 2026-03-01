@@ -42,12 +42,6 @@
   gap: 8px;
 }
 
-.btn__icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
 /* List */
 .kbPage .kbList {
   display: grid;

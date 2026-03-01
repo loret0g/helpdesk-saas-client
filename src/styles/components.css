@@ -206,6 +206,12 @@ a {
   background: rgba(255, 92, 122, 0.10);
 }
 
+.btn__icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 /* ========== Fields / Forms ========== */
 .field {
   display: grid;
