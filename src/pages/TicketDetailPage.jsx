@@ -4,8 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import {
   assignTicket,
   getTicket,
-  updateTicketStatus,
   setTicketAssignee,
+  updateTicketStatus,
 } from "../api/tickets.api";
 import { createMessage, listMessages } from "../api/messages.api";
 import { listAgents } from "../api/users.api";
@@ -51,11 +51,14 @@ function priorityToBadge(priority) {
   }
 }
 
-// helper: soporta strings y docs populados
-function getId(v) {
-  if (!v) return "";
-  if (typeof v === "string") return v;
-  return v._id || v.id || "";
+/**
+ * Extrae el id independientemente de si viene como string
+ * o como documento populado desde el backend.
+ */
+function getId(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value._id || value.id || "";
 }
 
 export default function TicketDetailPage() {
@@ -69,20 +72,24 @@ export default function TicketDetailPage() {
   const [ticket, setTicket] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  // ADMIN assignment UI
   const [agents, setAgents] = useState([]);
   const [agentsLoading, setAgentsLoading] = useState(false);
-  const [assigneePick, setAssigneePick] = useState(""); // "" => Unassigned
+  const [assigneePick, setAssigneePick] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [busy, setBusy] = useState(false); // assign/status/assignee
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [text, setText] = useState("");
 
   const canReply = useMemo(() => !!user, [user]);
   const myId = getId(user);
 
+  /**
+   * Carga ticket + mensajes de forma sincronizada.
+   * Usa AbortController para evitar estados inconsistentes
+   * si el usuario cambia rápidamente de ticket.
+   */
   async function loadAll(signal) {
     setError("");
     setLoading(true);
@@ -94,7 +101,6 @@ export default function TicketDetailPage() {
       const m = await listMessages(id, { signal });
       setMessages(Array.isArray(m) ? m : m?.messages || []);
 
-      // sync admin dropdown with ticket
       const currentAssigneeId = getId(t?.assigneeId);
       setAssigneePick(currentAssigneeId || "");
     } catch (err) {
@@ -112,21 +118,25 @@ export default function TicketDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Admin: load agents list
+  /**
+   * Solo ADMIN necesita la lista completa de agentes.
+   */
   useEffect(() => {
     if (!isAdmin) return;
 
+    const controller = new AbortController();
     let alive = true;
 
     async function loadAgents() {
       setAgentsLoading(true);
       try {
-        const data = await listAgents();
+        const data = await listAgents({ signal: controller.signal });
         const list = Array.isArray(data) ? data : data?.agents || [];
         if (!alive) return;
         setAgents(list);
       } catch (err) {
         if (!alive) return;
+        if (err?.name === "CanceledError" || err?.name === "AbortError") return;
         console.error(err);
       } finally {
         if (alive) setAgentsLoading(false);
@@ -136,6 +146,7 @@ export default function TicketDetailPage() {
     loadAgents();
     return () => {
       alive = false;
+      controller.abort();
     };
   }, [isAdmin]);
 
@@ -157,7 +168,6 @@ export default function TicketDetailPage() {
     }
   }
 
-  // AGENT only: assign to me
   async function handleAssignToMe() {
     setBusy(true);
     setError("");
@@ -188,9 +198,8 @@ export default function TicketDetailPage() {
     }
   }
 
-  // ADMIN: set assignee
   async function handleSetAssignee(e) {
-    const next = e.target.value; // "" => unassign
+    const next = e.target.value;
     setAssigneePick(next);
 
     setBusy(true);
@@ -245,7 +254,6 @@ export default function TicketDetailPage() {
   return (
     <div className="page ticketDetailPage">
       <div className="container ticketLayout">
-        {/* Topbar */}
         <div className="ticketTopbar">
           <Link className="btn btn--ghost" to="/tickets">
             ← Back
@@ -261,7 +269,6 @@ export default function TicketDetailPage() {
           </div>
         </div>
 
-        {/* Header */}
         <div className="card card--pad ticketHeader">
           <div className="ticketHeader__row">
             <div className="ticketHeader__left">
@@ -304,7 +311,6 @@ export default function TicketDetailPage() {
               </div>
             </div>
 
-            {/* Staff actions */}
             {isStaff && (
               <div className="ticketHeader__right">
                 {isAgent && (
@@ -312,9 +318,6 @@ export default function TicketDetailPage() {
                     className="btn btn--primary ticketAssignBtn"
                     onClick={handleAssignToMe}
                     disabled={busy || !!ticket?.assigneeId}
-                    title={
-                      ticket?.assigneeId ? "Already assigned" : "Assign to me"
-                    }
                     type="button"
                   >
                     {ticket?.assigneeId
@@ -332,8 +335,6 @@ export default function TicketDetailPage() {
                       value={assigneePick}
                       onChange={handleSetAssignee}
                       disabled={busy || agentsLoading}
-                      aria-label="Assign ticket to agent"
-                      title="Assign ticket to an agent"
                     >
                       <option value="">
                         {agentsLoading ? "Loading agents…" : "Unassigned"}
@@ -361,7 +362,6 @@ export default function TicketDetailPage() {
                     value={ticket?.status || "OPEN"}
                     onChange={handleStatusChange}
                     disabled={busy}
-                    aria-label="Ticket status"
                   >
                     <option value="OPEN">OPEN</option>
                     <option value="IN_PROGRESS">IN_PROGRESS</option>
@@ -376,21 +376,20 @@ export default function TicketDetailPage() {
             )}
           </div>
 
-          {ticket?.description ? (
+          {ticket?.description && (
             <div className="ticketDescription card card--soft card--pad">
               <div className="sectionTitle">Description</div>
               <div className="ticketText">{ticket.description}</div>
             </div>
-          ) : null}
+          )}
 
-          {error ? (
+          {error && (
             <div className="alert alert--danger ticketInlineError">
               <b>Oops.</b> {error}
             </div>
-          ) : null}
+          )}
         </div>
 
-        {/* Messages */}
         <div className="card card--pad ticketMessages">
           <div className="sectionHeader">
             <h2 className="sectionTitle">Messages</h2>
@@ -418,27 +417,24 @@ export default function TicketDetailPage() {
                       <div className="message__header">
                         <div className="message__author">
                           <span className="message__name">
-                            {m.authorId?.name || m.authorId?.email || "Unknown"}
+                            {m.authorId?.name ||
+                              m.authorId?.email ||
+                              "Unknown"}
                           </span>
 
                           {m.authorId?.role === "ADMIN" && (
-                            <span
-                              className="roleBadge roleBadge--admin"
-                              title="System admin"
-                            >
+                            <span className="roleBadge roleBadge--admin">
                               ADMIN
                             </span>
                           )}
 
                           {m.authorId?.role === "AGENT" && (
-                            <span
-                              className="roleBadge roleBadge--agent"
-                              title="Support agent"
-                            >
+                            <span className="roleBadge roleBadge--agent">
                               AGENT
                             </span>
                           )}
                         </div>
+
                         <div className="message__time">
                           {formatDateTime(m.createdAt)}
                         </div>
@@ -453,7 +449,6 @@ export default function TicketDetailPage() {
           )}
         </div>
 
-        {/* Reply */}
         <div className="card card--pad ticketReply">
           <div className="sectionHeader">
             <h2 className="sectionTitle">Reply</h2>
@@ -472,6 +467,7 @@ export default function TicketDetailPage() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Write your message…"
+                disabled={sending}
               />
 
               <div className="replyForm__footer">
