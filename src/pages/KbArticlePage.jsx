@@ -29,6 +29,7 @@ export default function KbArticlePage() {
 
   useEffect(() => {
     const controller = new AbortController();
+    let alive = true;
 
     async function load() {
       try {
@@ -36,17 +37,23 @@ export default function KbArticlePage() {
         setLoading(true);
 
         const a = await getKbArticle(slug, { signal: controller.signal });
+        if (!alive) return;
+
         setArticle(a);
       } catch (err) {
+        if (!alive) return;
         if (err?.name === "CanceledError" || err?.name === "AbortError") return;
         setError(err?.response?.data?.message || "Error loading article");
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
     }
 
     load();
-    return () => controller.abort();
+    return () => {
+      alive = false;
+      controller.abort();
+    };
   }, [slug]);
 
   if (loading) {
