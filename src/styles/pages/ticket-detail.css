@@ -242,7 +242,7 @@
   box-shadow: var(--shadow-soft);
 }
 
-.message__head {
+.message__header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -327,23 +327,6 @@
   border-color: rgba(124, 92, 255, 0.22);
 }
 
-.message--staff {
-  justify-content: flex-end;
-}
-
-.message--staff .message__bubble {
-  background: rgba(99, 102, 241, 0.06);
-  border-color: rgba(99, 102, 241, 0.18);
-}
-
-.message--customer {
-  justify-content: flex-start;
-}
-
-.message--customer .message__bubble {
-  background: rgba(255, 255, 255, 0.06);
-}
-
 /* ---------- Reply ---------- */
 .ticketReply {
   padding: 16px;
@@ -378,46 +361,4 @@
 .ticketMessages,
 .ticketReply {
   border-radius: 18px;
-}
-
-@media (max-width: 820px) {
-  .ticketDetail__layout {
-    gap: 12px;
-  }
-
-  .ticketDetail__headerTop {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .ticketDetail__actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .ticketDetail__statusField {
-    min-width: 0;
-  }
-}
-
-@media (max-width: 520px) {
-  .ticketDetail__topbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .ticketDetail__topbarRight {
-    display: flex;
-    justify-content: flex-start;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .ticketDetail__title {
-    font-size: 20px;
-    line-height: 1.2;
-  }
 }
