@@ -26,19 +26,25 @@ export async function getKbArticle(slug, options = {}) {
 }
 
 // POST /api/kb
-export async function createKbArticle(payload) {
-  const res = await http.post("/api/kb", payload);
+export async function createKbArticle(payload, options = {}) {
+  const res = await http.post("/api/kb", payload, {
+    signal: options.signal,
+  });
   return res.data;
 }
 
 // PATCH /api/kb/:id
-export async function updateKbArticle(id, payload) {
-  const res = await http.patch(`/api/kb/${id}`, payload);
+export async function updateKbArticle(id, payload, options = {}) {
+  const res = await http.patch(`/api/kb/${id}`, payload, {
+    signal: options.signal,
+  });
   return res.data;
 }
 
 // DELETE /api/kb/:id
-export async function archiveKbArticle(id) {
-  const res = await http.delete(`/api/kb/${id}`);
+export async function archiveKbArticle(id, options = {}) {
+  const res = await http.delete(`/api/kb/${id}`, {
+    signal: options.signal,
+  });
   return res.data;
 }
